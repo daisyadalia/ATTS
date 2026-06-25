@@ -8,13 +8,15 @@ if(!isset($_SESSION['admin_id'])){
     exit();
 }
 
-include"database/connection.php";
+include "database/connection.php";
 
 // Statistics
-$athletes = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM athlete"));
-$trainers = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM trainers"));
-$programs = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM training_programs"));
-$injuries = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM injury_reports"));
+$result = mysqli_query($conn, "SELECT * FROM athlete");
+$athletes = mysqli_num_rows($result);
+
+$trainers = 0;
+$programs = 0;
+$injuries = 0;
 ?>
 
 <!DOCTYPE html>
@@ -167,15 +169,15 @@ $injuries = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM injury_reports"))
         </tr>
 
         <?php
-        $result = mysqli_query($conn,
-        "SELECT * FROM athletes ORDER BY athlete_id DESC LIMIT 5");
+       $result = mysqli_query($conn,
+"SELECT * FROM athlete LIMIT 5");
 
         while($row = mysqli_fetch_assoc($result)){
         ?>
 
         <tr>
             <td><?php echo $row['athlete_id']; ?></td>
-            <td><?php echo $row['fullname']; ?></td>
+            <td><?php echo $row['full_name']; ?></td>
             <td><?php echo $row['sport']; ?></td>
             <td><?php echo $row['email']; ?></td>
         </tr>
