@@ -8,7 +8,7 @@ if(!isset($_SESSION['admin_id'])){
     exit();
 }
 
-include("config.php");
+include"database/connection.php";
 
 // Statistics
 $athletes = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM athletes"));
