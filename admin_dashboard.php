@@ -11,7 +11,7 @@ if(!isset($_SESSION['admin_id'])){
 include"database/connection.php";
 
 // Statistics
-$athletes = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM athletes"));
+$athletes = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM athlete"));
 $trainers = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM trainers"));
 $programs = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM training_programs"));
 $injuries = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM injury_reports"));
