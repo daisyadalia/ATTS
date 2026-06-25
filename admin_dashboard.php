@@ -8,8 +8,6 @@ if(!isset($_SESSION['admin_id'])){
     exit();
 }
 
-include "database/connection.php";
-
 // Statistics
 $result = mysqli_query($conn, "SELECT * FROM athlete");
 $athletes = mysqli_num_rows($result);
