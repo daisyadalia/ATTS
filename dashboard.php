@@ -11,16 +11,13 @@ if(!isset($_SESSION['athlete_id'])){
 
 ?>
 
-<link rel="stylesheet" href="css/style.css">
-
 <!DOCTYPE html>
 <html>
 <head>
 <title>Athlete Dashboard</title>
+<link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
-
-<link rel="stylesheet" href="css/style.css">
 
 <h1>Welcome <?php echo $_SESSION['name']; ?></h1>
 
@@ -30,16 +27,15 @@ if(!isset($_SESSION['athlete_id'])){
 
     <a href="upload.php">Upload Training Data</a>
 
-    <br><br>
-
     <a href="view_training.php">View Training Records</a>
-
-    <br><br>
 
     <a href="recommendation.php">View Injury Analysis</a>
 
-    <br><br>
+    <a href="athlete_coach_recommendations.php">Coach Recommendations</a>
 
     <a href="logout.php">Logout</a>
 
 </div>
+
+</body>
+</html>
