@@ -8,10 +8,13 @@ if(!isset($_SESSION['coach_id'])){
 }
 
 include "database/connection.php";
+include "database/schema.php";
 
 $message = "";
 $message_type = "success";
 $coach_id = $_SESSION['coach_id'];
+
+ensureTrainingLogColumns($conn);
 
 $create_table_sql = "CREATE TABLE IF NOT EXISTS coach_advice (
     advice_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,7 +43,11 @@ if(isset($_POST['send_recommendation'])){
 
 $athletes_result = mysqli_query($conn, "SELECT athlete_id, full_name FROM athlete WHERE coach_id = '$coach_id' ORDER BY full_name ASC");
 
-$result=mysqli_query($conn,"SELECT * FROM training_log ORDER BY training_date DESC");
+$result=mysqli_query($conn,"SELECT training_log.*, athlete.full_name AS athlete_name
+                            FROM training_log
+                            LEFT JOIN athlete ON training_log.athlete_id = athlete.athlete_id
+                            WHERE athlete.coach_id = '$coach_id'
+                            ORDER BY training_log.training_date DESC");
 
 ?>
 
@@ -89,7 +96,11 @@ $result=mysqli_query($conn,"SELECT * FROM training_log ORDER BY training_date DE
 
 <tr>
 
-<th>Athlete ID</th>
+<th>Athlete</th>
+
+<th>Muscle Group</th>
+
+<th>Workout Type</th>
 
 <th>Training Date</th>
 
@@ -103,9 +114,13 @@ while($row=mysqli_fetch_assoc($result)){
 
 echo "<tr>";
 
-echo "<td>".$row['athlete_id']."</td>";
+echo "<td>".htmlspecialchars($row['athlete_name'] ?? 'Athlete '.$row['athlete_id'])."</td>";
 
-echo "<td>".$row['training_date']."</td>";
+echo "<td>".htmlspecialchars($row['muscle_group'] ?? 'Not set')."</td>";
+
+echo "<td>".htmlspecialchars($row['workout_type'] ?? 'Not set')."</td>";
+
+echo "<td>".htmlspecialchars($row['training_date'])."</td>";
 
 echo "<td><a href='recommendation.php?athlete=".$row['athlete_id']."'>View Analysis</a></td>";
 

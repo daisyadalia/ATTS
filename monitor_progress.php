@@ -8,13 +8,17 @@ if(!isset($_SESSION['coach_id'])){
 }
 
 include "database/connection.php";
+include "database/schema.php";
 
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN muscle_group VARCHAR(50) NULL");
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN workout_type VARCHAR(100) NULL");
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN exercise_done TEXT NULL");
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN training_guidance TEXT NULL");
+ensureTrainingLogColumns($conn);
 
-$sql = "SELECT * FROM training_log ORDER BY training_date DESC";
+$coach_id = $_SESSION['coach_id'];
+
+$sql = "SELECT training_log.*, athlete.full_name AS athlete_name
+        FROM training_log
+        LEFT JOIN athlete ON training_log.athlete_id = athlete.athlete_id
+        WHERE athlete.coach_id = '$coach_id'
+        ORDER BY training_log.training_date DESC";
 
 $result = mysqli_query($conn, $sql);
 
@@ -42,11 +46,13 @@ $result = mysqli_query($conn, $sql);
 
 <th>Log ID</th>
 
-<th>Athlete ID</th>
+<th>Athlete</th>
 
 <th>Muscle Group</th>
 
 <th>Workout Type</th>
+
+<th>What Was Done</th>
 
 <th>Duration (Minutes)</th>
 
@@ -56,9 +62,9 @@ $result = mysqli_query($conn, $sql);
 
 </tr>
 
-<?php
+<?php if($result && mysqli_num_rows($result) > 0){ ?>
 
-while($row=mysqli_fetch_assoc($result))
+<?php while($row=mysqli_fetch_assoc($result))
 {
 
 ?>
@@ -67,25 +73,34 @@ while($row=mysqli_fetch_assoc($result))
 
 <td><?php echo $row['log_id']; ?></td>
 
-<td><?php echo $row['athlete_id']; ?></td>
+<td><?php echo htmlspecialchars($row['athlete_name'] ?? 'Athlete '.$row['athlete_id']); ?></td>
 
 <td><?php echo htmlspecialchars($row['muscle_group'] ?? 'Not set'); ?></td>
 
 <td><?php echo htmlspecialchars($row['workout_type'] ?? 'Not set'); ?></td>
 
-<td><?php echo $row['duration']; ?></td>
+<td><?php echo htmlspecialchars($row['exercise_done'] ?? 'Not set'); ?></td>
 
-<td><?php echo $row['muscle_load']; ?></td>
+<td><?php echo htmlspecialchars($row['duration']); ?></td>
 
-<td><?php echo $row['training_date']; ?></td>
+<td><?php echo htmlspecialchars($row['muscle_load']); ?></td>
+
+<td><?php echo htmlspecialchars($row['training_date']); ?></td>
 
 </tr>
 
 <?php
 
-}
+} ?>
 
-?>
+<?php }else{ ?>
+
+<tr>
+<td colspan="8">No training records found for your assigned athletes.</td>
+</tr>
+
+<?php } ?>
+
 
 </table>
 

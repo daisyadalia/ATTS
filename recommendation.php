@@ -3,6 +3,7 @@
 session_start();
 
 include "database/connection.php";
+include "database/schema.php";
 include "analysis/biomechanics.php";
 
 if(isset($_SESSION['athlete_id'])){
@@ -16,6 +17,8 @@ if(isset($_SESSION['athlete_id'])){
     exit();
 }
 
+ensureTrainingLogColumns($conn);
+
 $sql = "SELECT * FROM training_log
         WHERE athlete_id='$athlete_id'
         ORDER BY training_date DESC
@@ -26,6 +29,11 @@ $result = mysqli_query($conn, $sql);
 $error_message = "";
 $load = "";
 $risk = "";
+$muscle_group = "";
+$workout_type = "";
+$exercise_done = "";
+$training_guidance = "";
+$recommendation_text = "";
 
 if(!$result){
     $error_message = "SQL Error: " . mysqli_error($conn);
@@ -37,6 +45,16 @@ if(!$result){
     $risk = injuryRisk($load);
     $muscle_group = $data['muscle_group'] ?? "";
     $workout_type = $data['workout_type'] ?? "";
+    $exercise_done = $data['exercise_done'] ?? "";
+    $training_guidance = $data['training_guidance'] ?? "";
+
+    if($risk == "HIGH"){
+        $recommendation_text = "Reduce training intensity immediately and focus on recovery before repeating ".$muscle_group." training.";
+    }elseif($risk == "MEDIUM"){
+        $recommendation_text = "Monitor recovery, lower the workload, and use controlled movement during ".$muscle_group." sessions.";
+    }else{
+        $recommendation_text = "Continue normal training, maintain good technique, and keep following the planned ".$muscle_group." guidance.";
+    }
 }
 
 ?>
@@ -70,6 +88,14 @@ if(!$result){
 <p>Workout Type: <?php echo htmlspecialchars($workout_type); ?></p>
 <?php } ?>
 
+<?php if(!empty($exercise_done)){ ?>
+<p>Workout Done: <?php echo htmlspecialchars($exercise_done); ?></p>
+<?php } ?>
+
+<?php if(!empty($training_guidance)){ ?>
+<p>Training Guidance: <?php echo htmlspecialchars($training_guidance); ?></p>
+<?php } ?>
+
 <p>Risk Level: <?php echo htmlspecialchars($risk); ?></p>
 
 <?php
@@ -77,21 +103,21 @@ if(!$result){
 if($risk=="HIGH"){
 
     echo "<h3>Recommendation:</h3>";
-    echo "<p class='message danger'>Reduce training intensity immediately.</p>";
+    echo "<p class='message danger'>".htmlspecialchars($recommendation_text)."</p>";
 
 }
 
 elseif($risk=="MEDIUM"){
 
     echo "<h3>Recommendation:</h3>";
-    echo "<p class='message warning'>Monitor recovery and reduce workload.</p>";
+    echo "<p class='message warning'>".htmlspecialchars($recommendation_text)."</p>";
 
 }
 
 else{
 
     echo "<h3>Recommendation:</h3>";
-    echo "<p class='message success'>Continue normal training.</p>";
+    echo "<p class='message success'>".htmlspecialchars($recommendation_text)."</p>";
 
 }
 

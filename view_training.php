@@ -3,6 +3,7 @@
 session_start();
 
 include "database/connection.php";
+include "database/schema.php";
 
 if(!isset($_SESSION['athlete_id'])){
     header("Location: login.php");
@@ -11,10 +12,7 @@ if(!isset($_SESSION['athlete_id'])){
 
 $athlete_id = $_SESSION['athlete_id'];
 
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN muscle_group VARCHAR(50) NULL");
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN workout_type VARCHAR(100) NULL");
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN exercise_done TEXT NULL");
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN training_guidance TEXT NULL");
+ensureTrainingLogColumns($conn);
 
 $sql = "SELECT * FROM training_log
         WHERE athlete_id='$athlete_id'
@@ -38,7 +36,7 @@ $result = mysqli_query($conn,$sql);
 
 <h2>My Training Records</h2>
 
-<table border="1" cellpadding="10">
+<table>
 
 <tr>
     <th>ID</th>
@@ -51,9 +49,9 @@ $result = mysqli_query($conn,$sql);
     <th>Date</th>
 </tr>
 
-<?php
+<?php if($result && mysqli_num_rows($result) > 0){ ?>
 
-while($row = mysqli_fetch_assoc($result)){
+<?php while($row = mysqli_fetch_assoc($result)){
 
 echo "<tr>";
 
@@ -68,9 +66,15 @@ echo "<td>".htmlspecialchars($row['training_date'])."</td>";
 
 echo "</tr>";
 
-}
+} ?>
 
-?>
+<?php }else{ ?>
+
+<tr>
+    <td colspan="8">No training records found.</td>
+</tr>
+
+<?php } ?>
 
 </table>
 

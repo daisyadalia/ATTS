@@ -3,6 +3,7 @@
 session_start();
 
 include "database/connection.php";
+include "database/schema.php";
 
 $message = "";
 $message_type = "success";
@@ -12,10 +13,7 @@ if(!isset($_SESSION['athlete_id'])){
     exit();
 }
 
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN muscle_group VARCHAR(50) NULL");
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN workout_type VARCHAR(100) NULL");
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN exercise_done TEXT NULL");
-mysqli_query($conn, "ALTER TABLE training_log ADD COLUMN training_guidance TEXT NULL");
+ensureTrainingLogColumns($conn);
 
 if(isset($_POST['submit'])){
 

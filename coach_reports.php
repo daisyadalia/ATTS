@@ -8,6 +8,9 @@ if(!isset($_SESSION['coach_id'])){
 }
 
 include "database/connection.php";
+include "database/schema.php";
+
+ensureTrainingLogColumns($conn);
 
 $coach_id = $_SESSION['coach_id'];
 
@@ -18,6 +21,8 @@ $sql = "SELECT
             COUNT(training_log.log_id) AS total_sessions,
             ROUND(AVG(training_log.duration), 1) AS avg_duration,
             ROUND(AVG(training_log.muscle_load), 1) AS avg_muscle_load,
+            MAX(training_log.muscle_group) AS recent_muscle_group,
+            MAX(training_log.workout_type) AS recent_workout_type,
             MAX(training_log.training_date) AS latest_training
         FROM athlete
         LEFT JOIN training_log
@@ -47,6 +52,8 @@ $result = mysqli_query($conn, $sql);
     <th>Total Sessions</th>
     <th>Average Duration</th>
     <th>Average Muscle Load</th>
+    <th>Recent Muscle Group</th>
+    <th>Recent Workout Type</th>
     <th>Latest Training</th>
 </tr>
 
@@ -59,6 +66,8 @@ $result = mysqli_query($conn, $sql);
         <td><?php echo htmlspecialchars($row['total_sessions']); ?></td>
         <td><?php echo $row['avg_duration'] ? htmlspecialchars($row['avg_duration'])." min" : "No data"; ?></td>
         <td><?php echo $row['avg_muscle_load'] ? htmlspecialchars($row['avg_muscle_load'])."%" : "No data"; ?></td>
+        <td><?php echo !empty($row['recent_muscle_group']) ? htmlspecialchars($row['recent_muscle_group']) : "No data"; ?></td>
+        <td><?php echo !empty($row['recent_workout_type']) ? htmlspecialchars($row['recent_workout_type']) : "No data"; ?></td>
         <td><?php echo $row['latest_training'] ? htmlspecialchars($row['latest_training']) : "No data"; ?></td>
     </tr>
     <?php } ?>
@@ -66,7 +75,7 @@ $result = mysqli_query($conn, $sql);
 <?php }else{ ?>
 
     <tr>
-        <td colspan="6">No report data available.</td>
+        <td colspan="8">No report data available.</td>
     </tr>
 
 <?php } ?>

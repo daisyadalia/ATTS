@@ -8,7 +8,10 @@ if(!isset($_SESSION['coach_id']) && !isset($_SESSION['admin_id'])){
 }
 
 include "database/connection.php";
+include "database/schema.php";
 include "analysis/biomechanics.php";
+
+ensureTrainingLogColumns($conn);
 
 $is_admin = isset($_SESSION['admin_id']);
 $dashboard_link = $is_admin ? "admin_dashboard.php" : "coach_dashboard.php";
@@ -37,6 +40,8 @@ $report_sql = "SELECT
                     COUNT(training_log.log_id) AS total_sessions,
                     ROUND(AVG(training_log.duration), 1) AS avg_duration,
                     ROUND(AVG(training_log.muscle_load), 1) AS avg_muscle_load,
+                    MAX(training_log.muscle_group) AS recent_muscle_group,
+                    MAX(training_log.workout_type) AS recent_workout_type,
                     MAX(training_log.training_date) AS latest_training
                 FROM athlete
                 LEFT JOIN training_log
@@ -77,6 +82,8 @@ $summary = $summary_result ? mysqli_fetch_assoc($summary_result) : null;
     <th>Sessions</th>
     <th>Avg Duration</th>
     <th>Avg Muscle Load</th>
+    <th>Recent Muscle Group</th>
+    <th>Recent Workout Type</th>
     <th>Risk Level</th>
     <th>Latest Training</th>
 </tr>
@@ -94,6 +101,8 @@ $summary = $summary_result ? mysqli_fetch_assoc($summary_result) : null;
             <td><?php echo htmlspecialchars($row['total_sessions']); ?></td>
             <td><?php echo $row['avg_duration'] ? htmlspecialchars($row['avg_duration'])." min" : "No data"; ?></td>
             <td><?php echo $average_load ? htmlspecialchars($average_load)."%" : "No data"; ?></td>
+            <td><?php echo !empty($row['recent_muscle_group']) ? htmlspecialchars($row['recent_muscle_group']) : "No data"; ?></td>
+            <td><?php echo !empty($row['recent_workout_type']) ? htmlspecialchars($row['recent_workout_type']) : "No data"; ?></td>
             <td><?php echo htmlspecialchars($risk); ?></td>
             <td><?php echo $row['latest_training'] ? htmlspecialchars($row['latest_training']) : "No data"; ?></td>
         </tr>
@@ -102,7 +111,7 @@ $summary = $summary_result ? mysqli_fetch_assoc($summary_result) : null;
 <?php }else{ ?>
 
     <tr>
-        <td colspan="7">No report data available.</td>
+        <td colspan="9">No report data available.</td>
     </tr>
 
 <?php } ?>
